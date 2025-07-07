@@ -1,19 +1,42 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
+import { Route, Routes, BrowserRouter, useNavigate, useLocation } from 'react-router-dom';
 import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import UserForm from './components/Register';
+import UserList from './components/UserList';
+import Login from './components/Login';
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+function RootRouter() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const publicPaths = ['/register', '/login'];
+
+  useEffect(() => {
+    const localPrivet = localStorage.getItem('username');
+
+    if (!localPrivet && !publicPaths.includes(location.pathname)) {
+      navigate('/register', { replace: true });
+    }
+  }, [navigate, location]);
+
+  return (
+    <Routes>
+      <Route path="/" element={<App />} />
+      <Route path="/register" element={<UserForm onUserCreated={() => {}} />} />
+      <Route path="/users" element={<UserList />} />
+      <Route path="/login" element={<Login />} />
+    </Routes>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <RootRouter />
+    </BrowserRouter>
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
