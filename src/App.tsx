@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import Header from './components/Header';
-import './App.css'
+import React, { useState } from 'react'
+import Header from './components/Header'
+import Main from './components/Main'
 
-function App() {
-  
-  const userName = localStorage.getItem('username');
+const App = () => {
+  const [searchInput, setSearchInput] = useState('')
 
   return (
-    <div>
-      <Header />
-    </div>
-  );
+    <>
+      <Header searchInput={searchInput} setSearchInput={setSearchInput} />
+      <Main searchInput={searchInput} />
+    </>
+  )
 }
 
-export default App;
+export default App
