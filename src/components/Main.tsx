@@ -1,6 +1,5 @@
-import React from 'react'
-import { Card } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react';
+import { Card, Modal, Box } from '@mui/material';
 
 const movies = [
   {
@@ -27,7 +26,7 @@ const movies = [
     img: 'https://ic.p24.app/unsafe/540x800/cdn.p24.app/r/ps/ru/fa/fac9a781-21c0-43ec-8d68-34f7f88fbcef/73be512b-c4a0-4a71-a4ca-0263b087fb23.jpg',
     counter: 'Кыргызстан',
   }
-]
+];
 
 const popularMovies = [
   {
@@ -54,64 +53,87 @@ const popularMovies = [
     img: 'https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/c86217c1-33f8-4752-87d8-7c9b47eea598/150x225',
     counter: 'США, Германия',
   },
-]
-
-type MainProps = {
-  searchInput: string;
-}
-
-const Main: React.FC<MainProps> = ({ searchInput }) => {
-  const filteredMovies = movies.filter(movie =>
-    movie.title.toLowerCase().includes(searchInput.toLowerCase())
-  )
-
-  const filteredPopular = popularMovies.filter(movie =>
-    movie.title.toLowerCase().includes(searchInput.toLowerCase())
-  )
-
-  return (
-    <>
-      <h1 style={titleStyle}>В тренде:</h1>
-      <div style={cardWrapStyle}>
-        {filteredMovies.map((movie, index) => (
-          <MovieCard key={index} movie={movie} />
-        ))}
-      </div>
-
-      <h1 style={{ ...titleStyle, marginTop: '60px' }}>Популярные:</h1>
-      <div style={cardWrapStyle}>
-        {filteredPopular.map((movie, index) => (
-          <MovieCard key={index} movie={movie} />
-        ))}
-      </div>
-    </>
-  )
-}
+];
 
 type MovieType = {
   title: string;
   rating: number;
   img: string;
   counter: string;
-}
+};
 
-const MovieCard: React.FC<{ movie: MovieType }> = ({ movie }) => (
+type MainProps = {
+  searchInput: string;
+};
+
+const Main: React.FC<MainProps> = ({ searchInput }) => {
+  const [selectedMovie, setSelectedMovie] = useState<MovieType | null>(null);
+
+  const filteredMovies = movies.filter(movie =>
+    movie.title.toLowerCase().includes(searchInput.toLowerCase())
+  );
+
+  const filteredPopular = popularMovies.filter(movie =>
+    movie.title.toLowerCase().includes(searchInput.toLowerCase())
+  );
+
+  const handleClose = () => setSelectedMovie(null);
+
+  return (
+    <>
+      <h1 style={titleStyle}>В тренде:</h1>
+      <div style={cardWrapStyle}>
+        {filteredMovies.map((movie, index) => (
+          <MovieCard key={index} movie={movie} onClick={() => setSelectedMovie(movie)} />
+        ))}
+      </div>
+
+      <h1 style={{ ...titleStyle, marginTop: '60px' }}>Популярные:</h1>
+      <div style={cardWrapStyle}>
+        {filteredPopular.map((movie, index) => (
+          <MovieCard key={index} movie={movie} onClick={() => setSelectedMovie(movie)} />
+        ))}
+      </div>
+
+      <Modal open={!!selectedMovie} onClose={handleClose}>
+        <Box sx={modalStyle}>
+          {selectedMovie && (
+            <>
+              <img
+                src={selectedMovie.img}
+                alt={selectedMovie.title}
+                style={{ width: '100%', height: 400, objectFit: 'cover', borderRadius: '10px' }}
+              />
+              <h2>{selectedMovie.title}</h2>
+              <p><strong>Рейтинг:</strong> {selectedMovie.rating} ⭐</p>
+              <p><strong>Страна:</strong> {selectedMovie.counter}</p>
+              <button onClick={handleClose} style={closeButtonStyle}>Закрыть</button>
+            </>
+          )}
+        </Box>
+      </Modal>
+    </>
+  );
+};
+
+const MovieCard: React.FC<{ movie: MovieType; onClick: () => void }> = ({ movie, onClick }) => (
   <Card
-  sx={{
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: 300,
-    boxShadow: '0 0px 20px',
-    borderRadius: '15px',
-    padding: '20px',
-    transition: 'transform 0.3s ease',
-    cursor: 'pointer',
-    '&:hover': {
-      transform: 'scale(1.05)',
-      boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
-    },
-  }}
+    sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      width: 300,
+      boxShadow: '0 0px 20px',
+      borderRadius: '15px',
+      padding: '20px',
+      transition: 'transform 0.3s ease',
+      cursor: 'pointer',
+      '&:hover': {
+        transform: 'scale(1.05)',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
+      },
+    }}
+    onClick={onClick}
   >
     <img
       src={movie.img}
@@ -121,22 +143,17 @@ const MovieCard: React.FC<{ movie: MovieType }> = ({ movie }) => (
         borderRadius: '10px',
         marginBottom: '15px',
         objectFit: 'cover',
-        height: 400
+        height: 400,
       }}
     />
     <h2 style={{ margin: '0 0 10px 0' }}>{movie.title}</h2>
-    <div style={{
-      display: 'flex',
-      gap: '10px',
-      fontWeight: 'bold',
-      color: '#555',
-    }}>
+    <div style={{ display: 'flex', gap: '10px', fontWeight: 'bold', color: '#555' }}>
       <p>Рейтинг:</p>
       <p>{movie.rating}⭐</p>
     </div>
     <p>Страна: {movie.counter}</p>
   </Card>
-)
+);
 
 const titleStyle: React.CSSProperties = {
   marginTop: '30px',
@@ -154,7 +171,7 @@ const titleStyle: React.CSSProperties = {
   alignItems: 'center',
   borderRadius: '20px',
   boxShadow: '0px 0px 20px rgba(0,0,0,0.5)',
-}
+};
 
 const cardWrapStyle: React.CSSProperties = {
   display: 'flex',
@@ -162,7 +179,33 @@ const cardWrapStyle: React.CSSProperties = {
   justifyContent: 'center',
   flexWrap: 'wrap',
   padding: '0 20px',
-  marginBottom: '40px'
-}
+  marginBottom: '40px',
+};
 
-export default Main
+const modalStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  backgroundColor: 'white',
+  padding: '30px',
+  borderRadius: '15px',
+  width: '90%',
+  maxWidth: '500px',
+  boxShadow: '0 5px 30px rgba(0,0,0,0.3)',
+  textAlign: 'center',
+  outline: 'none',
+  objectFit: 'cover',
+};
+
+const closeButtonStyle: React.CSSProperties =  {
+  marginTop: '20px',
+  padding: '10px 20px',
+  border: 'none',
+  backgroundColor: '#1976d2',
+  color: 'white',
+  borderRadius: '8px',
+  cursor: 'pointer',
+};
+
+export default Main;
